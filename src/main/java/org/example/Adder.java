@@ -1,40 +1,125 @@
 package org.example;
 
-public class Adder {
+import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.stage.Stage;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+
+public class Adder extends Application {
 
     public static void main(String[] args) {
-        int A = 5;
-        int B = 9;
-        int m = 3;
+        launch(args);
+    }
 
-        int sum = add(A, B);
-        System.out.println("Sum: " + sum);
-        System.out.println("Sum binary: " + toBinary(sum));
+    @Override
+    public void start(Stage primaryStage) {
+        primaryStage.setTitle("Binary Adder and Error Checker");
 
-        int remainderAB = calculateModulo(sum, m);
-        System.out.println("(A + B) mod m: " + remainderAB);
-        System.out.println("(A + B) mod m binary: " + toBinary(remainderAB));
+        // Layout
+        VBox root = new VBox(10);
+        root.setPadding(new Insets(10));
 
-        int C_A = calculateModulo(A, m);
-        System.out.println("C(A): " + C_A);
-        System.out.println("C(A) binary: " + toBinary(C_A));
+        // Input fields
+        TextField inputA = new TextField();
+        inputA.setPromptText("Enter A");
 
-        int C_B = calculateModulo(B, m);
-        System.out.println("C(B): " + C_B);
-        System.out.println("C(B) binary: " + toBinary(C_B));
+        TextField inputB = new TextField();
+        inputB.setPromptText("Enter B");
 
-        int CACBSum = add(C_A, C_B);
-        System.out.println("C(A) + C(B): " + CACBSum);
-        System.out.println("C(A) + C(B) binary: " + toBinary(CACBSum));
+        TextField inputM = new TextField();
+        inputM.setPromptText("Enter m");
 
-        int remainderCACB = calculateModulo(CACBSum, m);
-        System.out.println("C(A) + C(B) mod m: " + remainderCACB);
-        System.out.println("C(A) + C(B) mod m binary: " + toBinary(remainderCACB));
+        //create error checkbox
+        CheckBox errorCheckbox = new CheckBox();
 
 
-        boolean isError = checkError(toBinary(remainderAB), toBinary(remainderCACB));
+        // Result display
+        TextArea resultsArea = new TextArea();
+        resultsArea.setEditable(false);
+        resultsArea.setWrapText(true);
 
-        System.out.println("Is error? : " + isError);
+        // Error indicator
+        Circle errorIndicator = new Circle(10);
+
+        // Button to perform calculation
+        Button calculateButton = new Button("Calculate");
+        calculateButton.setOnAction(e -> {
+            try {
+                int A = Integer.parseInt(inputA.getText());
+                int B = Integer.parseInt(inputB.getText());
+                int m = Integer.parseInt(inputM.getText());
+                boolean setError = errorCheckbox.isSelected();
+
+                StringBuilder results = new StringBuilder();
+
+                int sum = add(A, B);
+                results.append("Sum: ").append(sum).append("\n");
+                results.append("Sum binary: ").append(toBinary(sum)).append("\n");
+
+                int remainderAB = calculateModulo(sum, m);
+                results.append("(A + B) mod m: ").append(remainderAB).append("\n");
+                results.append("(A + B) mod m binary: ").append(toBinary(remainderAB)).append("\n");
+
+                int C_A = calculateModulo(A, m);
+                results.append("C(A): ").append(C_A).append("\n");
+                results.append("C(A) binary: ").append(toBinary(C_A)).append("\n");
+
+                int C_B = calculateModulo(B, m);
+                results.append("C(B): ").append(C_B).append("\n");
+                results.append("C(B) binary: ").append(toBinary(C_B)).append("\n");
+
+                int CACBSum = add(C_A, C_B);
+                results.append("C(A) + C(B): ").append(CACBSum).append("\n");
+                results.append("C(A) + C(B) binary: ").append(toBinary(CACBSum)).append("\n");
+
+                int remainderCACB = calculateModulo(CACBSum, m);
+                results.append("C(A) + C(B) mod m: ").append(remainderCACB).append("\n");
+                results.append("C(A) + C(B) mod m binary: ").append(toBinary(remainderCACB)).append("\n");
+
+                //error injection (to change)
+                if(setError){
+                    remainderCACB = 9;
+                }
+
+                boolean isError = checkError(toBinary(remainderAB), toBinary(remainderCACB));
+                results.append("Is error? : ").append(isError).append("\n");
+
+                // Update the results area
+                resultsArea.setText(results.toString());
+
+                // Update the error indicator color
+                if (isError) {
+                    errorIndicator.setFill(Color.RED);
+                } else {
+                    errorIndicator.setFill(Color.GREEN);
+                }
+
+            } catch (NumberFormatException ex) {
+                resultsArea.setText("Invalid input! Please enter valid integers.");
+                errorIndicator.setFill(Color.RED);
+            }
+        });
+
+        // Adding components to the layout
+        root.getChildren().addAll(
+                new Label("A:"), inputA,
+                new Label("B:"), inputB,
+                new Label("m:"), inputM,
+                new Label("Set error: "), errorCheckbox,
+                calculateButton,
+                resultsArea,
+                new Label("Error Indicator:"),
+                errorIndicator
+        );
+
+        // Set the scene and show the stage
+        Scene scene = new Scene(root, 400, 500);
+        primaryStage.setScene(scene);
+        primaryStage.show();
     }
 
     private static int add(int a, int b) {
@@ -45,7 +130,6 @@ public class Adder {
         return value % modulo;
     }
 
-    //porownywanie bit po bicie (w gui np. zaswieca sie czerwona lampka jak jest blad)
     private static boolean checkError(String r1, String r2) {
         if (r1.length() != r2.length()) {
             return true;
@@ -60,7 +144,7 @@ public class Adder {
         return false;
     }
 
-    private static String toBinary(int n){
+    private static String toBinary(int n) {
         return Integer.toBinaryString(n);
     }
 }
