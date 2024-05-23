@@ -1,6 +1,7 @@
 package org.example;
 
 import javafx.application.Application;
+import javafx.beans.property.BooleanProperty;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -8,6 +9,8 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 
 public class Adder extends Application {
 
@@ -35,6 +38,9 @@ public class Adder extends Application {
 
         //create error checkbox
         CheckBox errorCheckbox = new CheckBox();
+        CheckBox errorCheckbox2 = new CheckBox();
+        CheckBox errorCheckbox3 = new CheckBox();
+        CheckBox errorCheckbox4 = new CheckBox();
 
 
         // Result display
@@ -45,6 +51,25 @@ public class Adder extends Application {
         // Error indicator
         Circle errorIndicator = new Circle(10);
 
+
+        CheckBox[] checkboxes = {errorCheckbox, errorCheckbox2, errorCheckbox3, errorCheckbox4};
+
+        // Add a common listener to each checkbox
+        ChangeListener<Boolean> listener = (observable, oldValue, newValue) -> {
+            if (newValue) {
+                for (CheckBox checkbox : checkboxes) {
+                    if (checkbox != ((CheckBox) ((BooleanProperty) observable).getBean())) {
+                        checkbox.setSelected(false);
+                    }
+                }
+            }
+        };
+
+        for (CheckBox checkbox : checkboxes) {
+            checkbox.selectedProperty().addListener(listener);
+        }
+
+
         // Button to perform calculation
         Button calculateButton = new Button("Calculate");
         calculateButton.setOnAction(e -> {
@@ -52,41 +77,73 @@ public class Adder extends Application {
                 int A = Integer.parseInt(inputA.getText());
                 int B = Integer.parseInt(inputB.getText());
                 int m = Integer.parseInt(inputM.getText());
+
+
                 boolean setError = errorCheckbox.isSelected();
+                boolean setError2 = errorCheckbox2.isSelected();
+                boolean setError3 = errorCheckbox3.isSelected();
+                boolean setError4 = errorCheckbox4.isSelected();
 
                 StringBuilder results = new StringBuilder();
 
-                int sum = add(A, B);
+
+                assert AdderMethods.add(2, 3) == 5 : "Sum function is incorrect";
+                assert AdderMethods.calculateModulo(10, 3) == 1 : "Modulo calculation is incorrect";
+                assert AdderMethods.checkError("1010", "1011") : "Error check function is incorrect";
+
+                results.append("Assertions:\n");
+                results.append(" - Sum assertion: ").append((AdderMethods.add(2, 3) == 5) ? "Passed" : "Failed").append("\n");
+                results.append(" - Modulo assertion: ").append((AdderMethods.calculateModulo(10, 3) == 1) ? "Passed" : "Failed").append("\n");
+                results.append(" - Error check assertion: ").append((AdderMethods.checkError("1010", "1011")) ? "Passed" : "Failed").append("\n");
+
+                int sum = AdderMethods.add(A, B);
                 results.append("Sum: ").append(sum).append("\n");
-                results.append("Sum binary: ").append(toBinary(sum)).append("\n");
+                results.append("Sum binary: ").append(AdderMethods.toBinary(sum)).append("\n");
 
-                int remainderAB = calculateModulo(sum, m);
+                // Error injection
+                if(setError4) sum += 123;
+
+                int remainderAB = AdderMethods.calculateModulo(sum, m);
                 results.append("(A + B) mod m: ").append(remainderAB).append("\n");
-                results.append("(A + B) mod m binary: ").append(toBinary(remainderAB)).append("\n");
+                results.append("(A + B) mod m binary: ").append(AdderMethods.toBinary(remainderAB)).append("\n");
 
-                int C_A = calculateModulo(A, m);
+                int C_A = AdderMethods.calculateModulo(A, m);
                 results.append("C(A): ").append(C_A).append("\n");
-                results.append("C(A) binary: ").append(toBinary(C_A)).append("\n");
+                results.append("C(A) binary: ").append(AdderMethods.toBinary(C_A)).append("\n");
 
-                int C_B = calculateModulo(B, m);
+                int C_B = AdderMethods.calculateModulo(B, m);
                 results.append("C(B): ").append(C_B).append("\n");
-                results.append("C(B) binary: ").append(toBinary(C_B)).append("\n");
+                results.append("C(B) binary: ").append(AdderMethods.toBinary(C_B)).append("\n");
 
-                int CACBSum = add(C_A, C_B);
+                int CACBSum = AdderMethods.add(C_A, C_B);
                 results.append("C(A) + C(B): ").append(CACBSum).append("\n");
-                results.append("C(A) + C(B) binary: ").append(toBinary(CACBSum)).append("\n");
+                results.append("C(A) + C(B) binary: ").append(AdderMethods.toBinary(CACBSum)).append("\n");
 
-                int remainderCACB = calculateModulo(CACBSum, m);
+                // Error injection
+                if(setError3) CACBSum += 9;
+
+                int remainderCACB = AdderMethods.calculateModulo(CACBSum, m);
                 results.append("C(A) + C(B) mod m: ").append(remainderCACB).append("\n");
-                results.append("C(A) + C(B) mod m binary: ").append(toBinary(remainderCACB)).append("\n");
+                results.append("C(A) + C(B) mod m binary: ").append(AdderMethods.toBinary(remainderCACB)).append("\n");
 
-                //error injection (to change)
-                if(setError){
-                    remainderCACB = 9;
-                }
 
-                boolean isError = checkError(toBinary(remainderAB), toBinary(remainderCACB));
+                // Error injection
+                if (setError) remainderAB += 9;
+                else if (setError2) remainderCACB += 9;
+
+
+                // Error message
+                if(setError) results.append("Injected error in (A + B) mod m: ").append(remainderAB).append("\n");
+                else if (setError2) results.append("Injected error in (C(A) + C(B)) mod m: ").append(remainderCACB).append("\n");
+                else if (setError3) results.append("Injected error in the sum of C(A) + C(B): ").append(CACBSum).append("\n");
+                else if (setError4) results.append("Injected error in the sum of A + B: ").append(sum).append("\n");
+
+
+
+                boolean isError = AdderMethods.checkError(AdderMethods.toBinary(remainderAB), AdderMethods.toBinary(remainderCACB));
                 results.append("Is error? : ").append(isError).append("\n");
+
+
 
                 // Update the results area
                 resultsArea.setText(results.toString());
@@ -109,7 +166,7 @@ public class Adder extends Application {
                 new Label("A:"), inputA,
                 new Label("B:"), inputB,
                 new Label("m:"), inputM,
-                new Label("Set error: "), errorCheckbox,
+                new Label("Set error: "), errorCheckbox, errorCheckbox2, errorCheckbox3, errorCheckbox4,
                 calculateButton,
                 resultsArea,
                 new Label("Error Indicator:"),
@@ -122,29 +179,5 @@ public class Adder extends Application {
         primaryStage.show();
     }
 
-    private static int add(int a, int b) {
-        return a + b;
-    }
 
-    private static int calculateModulo(int value, int modulo) {
-        return value % modulo;
-    }
-
-    private static boolean checkError(String r1, String r2) {
-        if (r1.length() != r2.length()) {
-            return true;
-        }
-
-        for (int i = 0; i < r1.length(); i++) {
-            if (r1.charAt(i) != r2.charAt(i)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private static String toBinary(int n) {
-        return Integer.toBinaryString(n);
-    }
 }
