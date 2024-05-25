@@ -26,7 +26,6 @@ public class AdderMethods {
 
         return false;
     }
-
     static String toBinary(int n) {
         return Integer.toBinaryString(n);
     }

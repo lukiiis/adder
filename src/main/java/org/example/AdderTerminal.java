@@ -37,16 +37,16 @@ public class AdderTerminal {
         System.out.println("Is error? : " + isError);
     }
 
-    private static int add(int a, int b) {
+    static int add(int a, int b) {
         return a + b;
     }
 
-    private static int calculateModulo(int value, int modulo) {
+    static int calculateModulo(int value, int modulo) {
         return value % modulo;
     }
 
     //porownywanie bit po bicie (w gui np. zaswieca sie czerwona lampka jak jest blad)
-    private static boolean checkError(String r1, String r2) {
+    static boolean checkError(String r1, String r2) {
         if (r1.length() != r2.length()) {
             return true;
         }
@@ -60,7 +60,7 @@ public class AdderTerminal {
         return false;
     }
 
-    private static String toBinary(int n){
+    static String toBinary(int n){
         return Integer.toBinaryString(n);
     }
 }
