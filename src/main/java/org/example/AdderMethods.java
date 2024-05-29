@@ -1,19 +1,22 @@
 package org.example;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+
 public class AdderMethods {
 
-    AdderMethods(){
+    AdderMethods(){};
 
-    };
-    static int add(int a, int b) {
+    public static int add(int a, int b) {
         return a + b;
     }
 
-    static int calculateModulo(int value, int modulo) {
+    public static int calculateModulo(int value, int modulo) {
         return value % modulo;
     }
 
-    static boolean checkError(String r1, String r2) {
+    public static boolean checkError(String r1, String r2) {
         if (r1.length() != r2.length()) {
             return true;
         }
@@ -26,7 +29,15 @@ public class AdderMethods {
 
         return false;
     }
-    static String toBinary(int n) {
+    public static String toBinary(int n) {
         return Integer.toBinaryString(n);
+    }
+
+    public static void saveResultsToFile(String results) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("results.txt"))) {
+            writer.write(results);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

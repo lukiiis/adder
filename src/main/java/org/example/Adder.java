@@ -12,6 +12,8 @@ import javafx.scene.shape.Circle;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 
+import static org.example.AdderMethods.saveResultsToFile;
+
 public class Adder extends Application {
 
     public static void main(String[] args) {
@@ -155,6 +157,9 @@ public class Adder extends Application {
                     errorIndicator.setFill(Color.GREEN);
                 }
 
+                //save results to file
+                saveResultsToFile(results.toString());
+
             } catch (NumberFormatException ex) {
                 resultsArea.setText("Invalid input! Please enter valid integers.");
                 errorIndicator.setFill(Color.RED);
@@ -177,7 +182,7 @@ public class Adder extends Application {
         );
 
         // Set the scene and show the stage
-        Scene scene = new Scene(root, 400, 500);
+        Scene scene = new Scene(root, 500, 700);
         primaryStage.setScene(scene);
         primaryStage.show();
     }
